@@ -234,9 +234,9 @@ class AuditPolDataVista(obj.CType):
                     self.HandleManipulation, self.FileShare, self.PacketDrop)
         msg += "Filtering Platform Connection: {0}\nPrivelege Use:\n\t".format(
                     self.PlatformConnection) 
-        msg += "Sensitive: {0}\n\tNon Sensitive{1}\n\tOther Privilege Use Events{2}\nDetailed Tracking:\n\t".format(
+        msg += "Sensitive: {0}\n\tNon Sensitive: {1}\n\tOther Privilege Use Events: {2}\nDetailed Tracking:\n\t".format(
                     self.Sensitive, self.NonSensitive, self.PrivilegeOther)
-        msg += "Process Creation: {0}\n\tProcess Termination: {1}\n\tDPAPI Activity: {2}\n\tRPC Events\n".format(
+        msg += "Process Creation: {0}\n\tProcess Termination: {1}\n\tDPAPI Activity: {2}\n\tRPC Events: {3}\n".format(
                     self.ProcessCreation, self.ProcessTermination, self.DPAPI, self.RPC)
         msg += "Policy Change Events:\n\tAudit Policy Change: {0}\n\tAuthentication Policy Change: {1}\n\t".format(
                     self.AuditPolicyChange, self.AuthenticationPolicyChange)
@@ -291,9 +291,9 @@ class AuditPolData7(obj.CType):
                     self.HandleManipulation, self.FileShare, self.PacketDrop)
         msg += "Filtering Platform Connection: {0}\n\tDetailed File Share: {1}\nPrivelege Use:\n\t".format(
                     self.PlatformConnection, self.DetailedFileShare)
-        msg += "Sensitive: {0}\n\tNon Sensitive{1}\n\tOther Privilege Use Events{2}\nDetailed Tracking:\n\t".format(
+        msg += "Sensitive: {0}\n\tNon Sensitive: {1}\n\tOther Privilege Use Events: {2}\nDetailed Tracking:\n\t".format(
                     self.Sensitive, self.NonSensitive, self.PrivilegeOther)
-        msg += "Process Creation: {0}\n\tProcess Termination: {1}\n\tDPAPI Activity: {2}\n\tRPC Events\n".format(
+        msg += "Process Creation: {0}\n\tProcess Termination: {1}\n\tDPAPI Activity: {2}\n\tRPC Events: {3}\n".format(
                     self.ProcessCreation, self.ProcessTermination, self.DPAPI, self.RPC)
         msg += "Policy Change Events:\n\tAudit Policy Change: {0}\n\tAuthentication Policy Change: {1}\n\t".format(
                     self.AuditPolicyChange, self.AuthenticationPolicyChange)
