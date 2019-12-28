@@ -62,7 +62,7 @@ class Modules(common.AbstractWindowsCommand):
         offsettype = "(V)" if not self._config.PHYSICAL_OFFSET else "(P)"
         self.table_header(outfd,
                           [("Offset{0}".format(offsettype), "[addrpad]"),
-                           ("Name", "20"),
+                           ("Name", "40"),
                            ('Base', "[addrpad]"),
                            ('Size', "[addr]"),
                            ('File', "")
@@ -109,7 +109,7 @@ class UnloadedModules(common.AbstractWindowsCommand):
 
     def render_text(self, outfd, data):
         self.table_header(outfd, [
-                           ("Name", "20"),
+                           ("Name", "40"),
                            ('StartAddress', "[addrpad]"),
                            ('EndAddress', "[addrpad]"),
                            ('Time', "")])
