@@ -89,7 +89,7 @@ class ModScan(common.AbstractScanCommand):
     def render_text(self, outfd, data):
         self.table_header(outfd,
                           [(self.offset_column(), "#018x"),
-                           ('Name', "20"),
+                           ('Name', "40"),
                            ('Base', "[addrpad]"),
                            ('Size', "[addr]"),
                            ('File', "")

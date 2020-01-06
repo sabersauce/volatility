@@ -276,7 +276,7 @@ class Netscan(common.AbstractScanCommand):
                 str(net_object.CreateTime or '')])
 
     def render_text(self, outfd, data):
-        outfd.write("{0:<18} {1:<8} {2:<30} {3:<20} {4:<16} {5:<8} {6:<14} {7}\n".format(
+        outfd.write("{0:<18} {1:<8} {2:<50} {3:<50} {4:<16} {5:<8} {6:<14} {7}\n".format(
             self.offset_column(), "Proto", "Local Address", "Foreign Address",
             "State", "Pid", "Owner", "Created"))
 
@@ -289,7 +289,7 @@ class Netscan(common.AbstractScanCommand):
                 pid = int(net_object.Owner.UniqueProcessId)
                 owner = str(net_object.Owner.ImageFileName)
 
-            outfd.write("{0:<#18x} {1:<8} {2:<30} {3:<20} {4:<16} {5:<8} {6:<14} {7}\n".format(
+            outfd.write("{0:<#18x} {1:<8} {2:<50} {3:<50} {4:<16} {5:<8} {6:<14} {7}\n".format(
                 net_object.obj_offset, proto, lendpoint,
                 rendpoint, state, pid,
                 owner,
