@@ -71,7 +71,7 @@ class linux_check_creds(linux_pslist.linux_pslist):
                     yield(0, [str(pid_str)])
 
     def render_text(self, outfd, data):
-        self.table_header(outfd, [("PIDs", "8")]) 
+        self.table_header(outfd, [("PIDs", "50")]) 
                     
         # print out processes that are sharing cred structures              
         for htable in data:

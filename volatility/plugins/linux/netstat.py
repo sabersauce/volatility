@@ -94,7 +94,7 @@ class linux_netstat(linux_pslist.linux_pslist):
             for ents in task.netstat():
                 if ents[0] == socket.AF_INET:
                     (_, proto, saddr, sport, daddr, dport, state) = ents[1]
-                    outfd.write("{0:8s} {1:<16}:{2:>5} {3:<16}:{4:>5} {5:<15s} {6:>17s}/{7:<5d}\n".format(proto, saddr, sport, daddr, dport, state, task.comm, task.pid))
+                    outfd.write("{0:8s} {1:45}:{2:5} {3:45}:{4:5} {5:<15s} {6:>17s}/{7:<5d}\n".format(proto, saddr, sport, daddr, dport, state, task.comm, task.pid))
 
                 elif ents[0] == 1 and not self._config.IGNORE_UNIX:
                     (name, inum) = ents[1]

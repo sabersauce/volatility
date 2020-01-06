@@ -113,11 +113,14 @@ class linux_netscan(linux_common.AbstractLinuxCommand):
                 if str(saddr) == "0.0.0.0" and str(daddr) == "0.0.0.0" and sport == 6 and dport == 0:
                     continue
 
+                if (state == "CLOSE" or state == "ESTABLISHED") and dport == 0:
+                    continue
+
                 yield (i, i.protocol, saddr, sport, daddr, dport, state)
     
     def render_text(self, outfd, data):
         for (isock, proto, saddr, sport, daddr, dport, state) in data:
-            outfd.write("{6:x} {0:8s} {1:<16}:{2:>5} {3:<16}:{4:>5} {5:<15s}\n".format(proto, saddr, sport, daddr, dport, state, isock.v()))
+            outfd.write("{6:20x} {0:8s} {1:45}:{2:5} {3:45}:{4:5} {5:15s}\n".format(proto, saddr, sport, daddr, dport, state, isock.v()))
 
    
 
