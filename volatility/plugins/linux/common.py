@@ -144,7 +144,7 @@ def walk_internal_list(struct_name, list_member, list_start, addr_space = None):
         list_start = getattr(list_struct, list_member)
 
 # based on __d_path
-def do_get_path(dentry, rmnt, rdentry, vfsmnt):
+def do_get_path(rdentry, rmnt, dentry, vfsmnt):
     ret_path = []
 
     inode = dentry.d_inode
@@ -169,7 +169,7 @@ def do_get_path(dentry, rmnt, rdentry, vfsmnt):
 
     ret_path.reverse()
 
-    if ret_path == []:
+    if ret_path == [] or not any(ret_path):
         return []
 
     ret_val = '/'.join([str(p) for p in ret_path if p != ""])
