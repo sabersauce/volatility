@@ -40,11 +40,12 @@ class EventHooks(sessions.Sessions):
                     handle.phead.v(),
                     session.SessionId))
 
-                outfd.write("Type: {0}, Flags: {1}, Thread: {2}, Process: {3}\n".format(
+                outfd.write("Type: {0}, Flags: {1}, Thread: {2}, Process: {3}, Name: {4}\n".format(
                     handle.bType,
                     handle.bFlags,
                     handle.Thread.Cid.UniqueThread,
                     handle.Process.UniqueProcessId,
+                    handle.Process.ImageFileName
                 ))
 
                 event_hook = handle.reference_object()
