@@ -47,7 +47,8 @@ class VadTraverser(obj.CType):
         """
 
         if depth > 100:
-            raise RuntimeError("Vad tree too deep - something went wrong!")
+            #raise RuntimeError("Vad tree too deep - something went wrong!")
+            return
 
         if visited == None:
             visited = set()
