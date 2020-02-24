@@ -157,6 +157,11 @@ def main():
     # Reset the logging level now we know whether debug is set or not
     debug.setup(config.DEBUG)
 
+    profs = registry.get_plugin_classes(obj.Profile)
+    for pro in profs:
+        if "profile" in pro:
+            config.update("PROFILE", pro)
+
     module = None
     ## Try to find the first thing that looks like a module name
     cmds = registry.get_plugin_classes(commands.Command, lower = True)
