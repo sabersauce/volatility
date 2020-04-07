@@ -578,30 +578,143 @@ struct mount {
 
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
     struct proc_dir_entry {
-        unsigned int low_ino;
-        umode_t mode;
-        nlink_t nlink;
-        kuid_t uid;
-        kgid_t gid;
-        loff_t size;
-        const struct inode_operations *proc_iops;
-        const struct file_operations *proc_fops;
-        struct proc_dir_entry *next, *parent, *subdir;
-        void *data;
-        atomic_t count;         /* use count */
-        atomic_t in_use;        /* number of callers into module in progress; */
-                              /* negative -> it's going away RSN */
-        struct completion *pde_unload_completion;
-        struct list_head pde_openers;   /* who did ->open, but not ->release */
-        spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
-        u8 namelen;
-        char name[];
+	/*
+	 * number of callers into module in progress;
+	 * negative -> it's going away RSN
+	 */
+	atomic_t in_use;
+	refcount_t refcnt;
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	/* protects ->pde_openers and all struct pde_opener instances */
+	spinlock_t pde_unload_lock;
+	struct completion *pde_unload_completion;
+	const struct inode_operations *proc_iops;
+	union {
+		const struct proc_ops *proc_ops;
+		const struct file_operations *proc_dir_ops;
+	};
+	const struct dentry_operations *proc_dops;
+	union {
+		const struct seq_operations *seq_ops;
+		int (*single_show)(struct seq_file *, void *);
+	};
+	proc_write_t write;
+	void *data;
+	unsigned int state_size;
+	unsigned int low_ino;
+	nlink_t nlink;
+	kuid_t uid;
+	kgid_t gid;
+	loff_t size;
+	struct proc_dir_entry *parent;
+	struct rb_root subdir;
+	struct rb_node subdir_node;
+	char *name;
+	umode_t mode;
+	u8 namelen;
+	char inline_name[];
     };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)
+    struct proc_dir_entry {
+	/*
+	 * number of callers into module in progress;
+	 * negative -> it's going away RSN
+	 */
+	atomic_t in_use;
+	refcount_t refcnt;
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	/* protects ->pde_openers and all struct pde_opener instances */
+	spinlock_t pde_unload_lock;
+	struct completion *pde_unload_completion;
+	const struct inode_operations *proc_iops;
+	const struct file_operations *proc_fops;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,29) && LINUX_VERSION_CODE < KERNEL_VERSION(4,20,0)) || LINUX_VERSION_CODE >= KERNEL_VERSION(4,20,16)
+	const struct dentry_operations *proc_dops;
+#endif
+	union {
+		const struct seq_operations *seq_ops;
+		int (*single_show)(struct seq_file *, void *);
+	};
+	proc_write_t write;
+	void *data;
+	unsigned int state_size;
+	unsigned int low_ino;
+	nlink_t nlink;
+	kuid_t uid;
+	kgid_t gid;
+	loff_t size;
+	struct proc_dir_entry *parent;
+	struct rb_root subdir;
+	struct rb_node subdir_node;
+	char *name;
+	umode_t mode;
+	u8 namelen;
+	char inline_name[];
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+    struct proc_dir_entry {
+	/*
+	 * number of callers into module in progress;
+	 * negative -> it's going away RSN
+	 */
+	atomic_t in_use;
+	refcount_t refcnt;
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	/* protects ->pde_openers and all struct pde_opener instances */
+	spinlock_t pde_unload_lock;
+	struct completion *pde_unload_completion;
+	const struct inode_operations *proc_iops;
+	const struct file_operations *proc_fops;
+	void *data;
+	unsigned int low_ino;
+	nlink_t nlink;
+	kuid_t uid;
+	kgid_t gid;
+	loff_t size;
+	struct proc_dir_entry *parent;
+	struct rb_root subdir;
+	struct rb_node subdir_node;
+	char *name;
+	umode_t mode;
+	u8 namelen;
+#ifdef CONFIG_64BIT
+#define SIZEOF_PDE_INLINE_NAME	(192-139)
 #else
-   struct proc_dir_entry {
+#define SIZEOF_PDE_INLINE_NAME	(128-87)
+#endif
+	char inline_name[SIZEOF_PDE_INLINE_NAME];
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0)
+    struct proc_dir_entry {
+	/*
+	 * number of callers into module in progress;
+	 * negative -> it's going away RSN
+	 */
+	atomic_t in_use;
+	atomic_t count;		/* use count */
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	/* protects ->pde_openers and all struct pde_opener instances */
+	spinlock_t pde_unload_lock;
+	struct completion *pde_unload_completion;
+	const struct inode_operations *proc_iops;
+	const struct file_operations *proc_fops;
+	void *data;
+	unsigned int low_ino;
+	nlink_t nlink;
+	kuid_t uid;
+	kgid_t gid;
+	loff_t size;
+	struct proc_dir_entry *parent;
+	struct rb_root_cached subdir;
+	struct rb_node subdir_node;
+	umode_t mode;
+	u8 namelen;
+	char name[];
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,19,0)
+    struct proc_dir_entry {
         unsigned int low_ino;
         umode_t mode;
         nlink_t nlink;
@@ -623,7 +736,127 @@ struct mount {
         u8 namelen;
         char name[];
    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+    struct proc_dir_entry {
+        unsigned int low_ino;
+        umode_t mode;
+        nlink_t nlink;
+        kuid_t uid;
+        kgid_t gid;
+        loff_t size;
+        const struct inode_operations *proc_iops;
+        const struct file_operations *proc_fops;
+        struct proc_dir_entry *next, *parent, *subdir;
+        void *data;
+        atomic_t count;         /* use count */
+        atomic_t in_use;        /* number of callers into module in progress; */
+                              /* negative -> it's going away RSN */
+        struct completion *pde_unload_completion;
+        struct list_head pde_openers;   /* who did ->open, but not ->release */
+        spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+        u8 namelen;
+        char name[];
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+    struct proc_dir_entry {
+	unsigned int low_ino;
+	mode_t mode;
+	nlink_t nlink;
+	uid_t uid;
+	gid_t gid;
+	loff_t size;
+	const struct inode_operations *proc_iops;
+	/*
+	 * NULL ->proc_fops means "PDE is going away RSN" or
+	 * "PDE is just created". In either case, e.g. ->read_proc won't be
+	 * called because it's too late or too early, respectively.
+	 *
+	 * If you're allocating ->proc_fops dynamically, save a pointer
+	 * somewhere.
+	 */
+	const struct file_operations *proc_fops;
+	struct proc_dir_entry *next, *parent, *subdir;
+	void *data;
+	read_proc_t *read_proc;
+	write_proc_t *write_proc;
+	atomic_t count;		/* use count */
+	int pde_users;	/* number of callers into module in progress */
+	struct completion *pde_unload_completion;
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+	u8 namelen;
+	char name[];
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+    struct proc_dir_entry {
+	unsigned int low_ino;
+	unsigned short namelen;
+	const char *name;
+	mode_t mode;
+	nlink_t nlink;
+	uid_t uid;
+	gid_t gid;
+	loff_t size;
+	const struct inode_operations *proc_iops;
+	/*
+	 * NULL ->proc_fops means "PDE is going away RSN" or
+	 * "PDE is just created". In either case, e.g. ->read_proc won't be
+	 * called because it's too late or too early, respectively.
+	 *
+	 * If you're allocating ->proc_fops dynamically, save a pointer
+	 * somewhere.
+	 */
+	const struct file_operations *proc_fops;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+	get_info_t *get_info;
 #endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+	struct module *owner;
+#endif
+	struct proc_dir_entry *next, *parent, *subdir;
+	void *data;
+	read_proc_t *read_proc;
+	write_proc_t *write_proc;
+	atomic_t count;		/* use count */
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,23)
+	int deleted;
+#endif
+	int pde_users;	/* number of callers into module in progress */
+	spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+	struct completion *pde_unload_completion;
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,26)
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+#endif
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,24)
+	shadow_proc_t *shadow_proc;
+#endif
+    };
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,11)
+    struct proc_dir_entry {
+	unsigned int low_ino;
+	unsigned short namelen;
+	const char *name;
+	mode_t mode;
+	nlink_t nlink;
+	uid_t uid;
+	gid_t gid;
+	unsigned long size;
+	struct inode_operations * proc_iops;
+	struct file_operations * proc_fops;
+	get_info_t *get_info;
+	struct module *owner;
+	struct proc_dir_entry *next, *parent, *subdir;
+	void *data;
+	read_proc_t *read_proc;
+	write_proc_t *write_proc;
+	atomic_t count;		/* use count */
+	int deleted;		/* delete flag */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,15)
+	void *set;
+#endif
+    };
+#else
+#warning "Unsupported kernel version (< 2.6.11)"
 #endif
 
 struct resource resource;
