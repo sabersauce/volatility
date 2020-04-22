@@ -1060,7 +1060,8 @@ class module_struct(obj.CType):
 
         if self.state.v() in [0, 1, 2] and \
            self.core_size >= 1 and self.core_size <= 1000000 and \
-           self.core_text_size >= 1 and self.core_text_size <= 1000000:
+           self.core_text_size >= 1 and self.core_text_size <= 1000000 and \
+           self.module_core.v():
         
             s = self.obj_vm.read(self.name.obj_offset, 64)
             if s:

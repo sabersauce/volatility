@@ -75,8 +75,10 @@ class linux_kernel_opened_files(linux_common.AbstractLinuxCommand):
         loop_max = 1 << d_hash_shift
 
         d_htable_ptr = obj.Object("Pointer", offset = self.addr_space.profile.get_symbol("dentry_hashtable"), vm = self.addr_space)
-
-        arr = obj.Object(theType = "Array", targetType = "hlist_bl_head", offset = d_htable_ptr, vm = self.addr_space, count = loop_max)
+        if self.addr_space.profile.has_type("hlist_bl_head") and self.addr_space.profile.has_type("hlist_bl_node"):
+            arr = obj.Object(theType = "Array", targetType = "hlist_bl_head", offset = d_htable_ptr, vm = self.addr_space, count = loop_max)
+        else:
+            arr = obj.Object(theType = "Array", targetType = "hlist_head", offset = d_htable_ptr, vm = self.addr_space, count = loop_max)
 
         hash_offset = self.addr_space.profile.get_obj_offset("dentry", "d_hash")
 
@@ -86,8 +88,10 @@ class linux_kernel_opened_files(linux_common.AbstractLinuxCommand):
             if not list_head.first.is_valid():
                 continue
 
-
-            node = obj.Object("hlist_bl_node", offset = list_head.first & ~1, vm = self.addr_space)
+            if self.addr_space.profile.has_type("hlist_bl_head") and self.addr_space.profile.has_type("hlist_bl_node"):
+                node = obj.Object("hlist_bl_node", offset = list_head.first & ~1, vm = self.addr_space)
+            else:
+                node = obj.Object("hlist_node", offset = list_head.first, vm = self.addr_space)
 
             for node, cnt in self._walk_node(node):
                 dents[node.v() - hash_offset] = 0
