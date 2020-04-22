@@ -88,11 +88,11 @@ class linux_lsmod(linux_common.AbstractLinuxCommand):
 
                 fd.write("}")
 
-            outfd.write("{2:x} {0:s} {1:d}\n".format(module.name, module.init_size + module.core_size, module.obj_offset))
+            outfd.write("{2:x}\t{0:s}\t{1:d}\n".format(module.name, module.init_size + module.core_size, module.obj_offset))
 
             # will be empty list if not set on command line
             for sect in sections:
-                outfd.write("\t{0:30s} {1:#x}\n".format(sect.sect_name, sect.address))
+                outfd.write("\t{0:30s}\t{1:#x}\n".format(sect.sect_name, sect.address))
 
             # will be "" if not set, otherwise will be space seperated
             if params != "":
