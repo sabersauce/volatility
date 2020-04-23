@@ -119,11 +119,11 @@ class linux_hidden_modules(linux_common.AbstractLinuxCommand):
 
     def generator(self, data):
         for module in data:
-            yield (0, [Address(module.obj_offset), str(module.name), module.init_size + module.core_size])
+            yield (0, [Address(module.obj_offset), str(module.name), module.core_size])
 
     def render_text(self, outfd, data):
         self.table_header(outfd, [("Offset (V)", "[addrpad]"), ("Name", "64"), ("Size", "")])
 
         for module in data:
-            self.table_row(outfd, module.obj_offset, str(module.name), module.init_size + module.core_size)
+            self.table_row(outfd, module.obj_offset, str(module.name), module.core_size)
 
