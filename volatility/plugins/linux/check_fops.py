@@ -223,7 +223,9 @@ class linux_check_fop(linux_common.AbstractLinuxCommand):
         linux_common.set_plugin_members(self)
 
         modules = linux_lsmod.linux_lsmod(self._config).get_modules()
-            
+
+        memory_model = self.addr_space.profile.metadata.get('memory_model', '32bit')
+
         f_op_members = self.profile.types['file_operations'].keywords["members"].keys()
         f_op_members.remove('owner')
         if 'mmap_supported_flags' in f_op_members:
@@ -235,7 +237,9 @@ class linux_check_fop(linux_common.AbstractLinuxCommand):
                 debug.error("Invalid inode address given. Please use linux_find_file to determine valid inode addresses.")
 
             for (hooked_member, hook_address) in self.verify_ops(inode.i_fop, f_op_members, modules):
-                yield("inode at {0:x}".format(inode.obj_offset), hooked_member, hook_address)
+                if (memory_model == '32bit' and hook_address >= 0xC0000000 and hook_address <= 0xFFFFFFFF) or \
+                        (memory_model != '32bit' and hook_address >= 0xFFFF800000000000 and hook_address <= 0xFFFFFFFFFFFFFFFF):
+                    yield("inode at {0:x}".format(inode.obj_offset), hooked_member, hook_address)
             
         else:
             funcs = [self.check_open_files_fop, self.check_proc_fop, self.check_proc_root_fops, \
@@ -243,7 +247,9 @@ class linux_check_fop(linux_common.AbstractLinuxCommand):
             
             for func in funcs:
                 for (name, member, address) in func(f_op_members, modules):
-                    yield (name, member, address)
+                    if (memory_model == '32bit' and address >= 0xC0000000 and address <= 0xFFFFFFFF) or \
+                            (memory_model != '32bit' and address >= 0xFFFF800000000000 and address <= 0xFFFFFFFFFFFFFFFF):
+                        yield (name, member, address)
 
     def unified_output(self, data):
         return TreeGrid([("SymbolName", str),

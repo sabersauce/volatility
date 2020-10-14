@@ -88,14 +88,18 @@ class linux_check_afinfo(linux_common.AbstractLinuxCommand):
         
         modules  = linux_lsmod.linux_lsmod(self._config).get_modules()
         seq_members = self.profile.types['seq_operations'].keywords["members"].keys()       
-        
+
+        memory_model = self.addr_space.profile.metadata.get('memory_model', '32bit')
+
         if self.addr_space.profile.obj_has_member("tcp_seq_afinfo", "seq_fops"):
             func = self._pre_4_18
         else:
             func = self._4_18_plus
 
         for name, member, address in func(modules, seq_members):
-            yield name, member, address
+            if (memory_model == '32bit' and address >= 0xC0000000 and address <= 0xFFFFFFFF) or \
+                    (memory_model != '32bit' and address >= 0xFFFF800000000000 and address <= 0xFFFFFFFFFFFFFFFF):
+                yield name, member, address
         
     def render_text(self, outfd, data):
 
