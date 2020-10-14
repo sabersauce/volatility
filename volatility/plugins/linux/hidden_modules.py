@@ -51,7 +51,13 @@ class linux_hidden_modules(linux_common.AbstractLinuxCommand):
             min_addr_sym = obj.Object("unsigned long", offset = addr + skip_size, vm = addr_space)
             max_addr_sym = obj.Object("unsigned long", offset = addr + skip_size + ulong_size, vm = addr_space)
         else:
-            debug.error("Unsupport kernel verison. Please file a bug ticket that includes your kernel version and distribution.")
+            memory_model = self.addr_space.profile.metadata.get('memory_model', '32bit')
+            if memory_model == '32bit':
+                min_addr_sym = 0xC0000000
+                max_addr_sym = 0xFFFF8000
+            else:
+                min_addr_sym = 0xFFFFFFFF80000000
+                max_addr_sym = 0xFFFFFFFFFFFF0000
 
         min_addr = min_addr_sym & ~0xfff
         max_addr = (max_addr_sym & ~0xfff) + 0x1000
@@ -79,7 +85,10 @@ class linux_hidden_modules(linux_common.AbstractLinuxCommand):
         for page in range(min_addr, max_addr, 4096):
             to_append = allfs
 
-            tmp = addr_space.read(page, 4096)
+            try:
+                tmp = addr_space.read(page, 4096)
+            except:
+                continue
             if tmp:
                 non_zero = False
                 for t in tmp:
