@@ -187,7 +187,7 @@ def main():
 
             command.execute()
     except exceptions.VolatilityException, e:
-        print e
+        raise
 
 if __name__ == "__main__":
     config.set_usage(usage = "Volatility - A memory forensics analysis platform.")
